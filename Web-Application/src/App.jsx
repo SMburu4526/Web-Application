@@ -1,26 +1,56 @@
 import { useState } from "react";
 
 function App() {
-  const [message, setMessage] = useState("");
-  const [response, setResponse] = useState("");
+  const [items, setItems] = useState([]);
+  const [text, setText] = useState("");
+  const [editId, setEditId] = useState(null);
 
-  const sendMessage = () => {
-    setResponse(`Echo: ${message}`);
-    setMessage("");
+  const save = () => {
+    if (!text.trim()) return;
+    
+    if (editId) {
+      setItems(items.map(item => 
+        item.id === editId ? { ...item, text } : item
+      ));
+      setEditId(null);
+    } else {
+      setItems([...items, { id: Date.now(), text }]);
+    }
+    setText("");
+  };
+
+  const edit = (item) => {
+    setText(item.text);
+    setEditId(item.id);
+  };
+
+  const remove = (id) => {
+    setItems(items.filter(item => item.id !== id));
   };
 
   return (
     <div style={{ padding: "20px" }}>
-      <h1>Web Application</h1>
+      <h1>CRUD App</h1>
       
       <input 
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        placeholder="Enter a message"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Enter item"
       />
-      <button onClick={sendMessage}>Send</button>
+      <button onClick={save}>
+        {editId ? "Update" : "Add"}
+      </button>
+      {editId && <button onClick={() => { setEditId(null); setText(""); }}>Cancel</button>}
 
-      {response && <p>{response}</p>}
+      <ul>
+        {items.map(item => (
+          <li key={item.id}>
+            {item.text}
+            <button onClick={() => edit(item)}>Edit</button>
+            <button onClick={() => remove(item.id)}>Delete</button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
